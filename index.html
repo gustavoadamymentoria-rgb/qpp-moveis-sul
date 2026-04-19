@@ -1,0 +1,1105 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Móveis Sul — Biblioteca de Vídeos</title>
+  <style>
+    :root {
+      --bg: #080808;
+      --surface: #111111;
+      --surface-2: #161616;
+      --border: #222222;
+      --border-light: #2a2a2a;
+      --accent: #F5A623;
+      --accent-dim: rgba(245,166,35,0.12);
+      --accent-hover: #ffbe45;
+      --text: #E8E0D4;
+      --text-2: #999890;
+      --text-3: #555550;
+      --danger: #E05252;
+      --danger-dim: rgba(224,82,82,0.1);
+      --green: #52c27a;
+      --green-dim: rgba(82,194,122,0.1);
+      --r: 3px;
+      --ease: 0.2s ease;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Courier New', Courier, monospace;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* Subtle scanline texture */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(0,0,0,0.025) 3px, rgba(0,0,0,0.025) 4px);
+      pointer-events: none;
+      z-index: 9999;
+    }
+
+    /* ─── HEADER ──────────────────────────────────────── */
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(8,8,8,0.96);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      padding: 0 2rem;
+      height: 56px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+
+    .logo img {
+      height: 36px;
+      width: auto;
+      display: block;
+    }
+
+    .header-right { display: flex; align-items: center; gap: 0.5rem; }
+
+    /* ─── BUTTONS ─────────────────────────────────────── */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.45rem 0.9rem;
+      border-radius: var(--r);
+      border: 1px solid transparent;
+      cursor: pointer;
+      font-family: 'Courier New', monospace;
+      font-size: 0.72rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      transition: all var(--ease);
+      white-space: nowrap;
+      background: none;
+      color: var(--text);
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #080808;
+      border-color: var(--accent);
+      font-weight: bold;
+    }
+    .btn-primary:hover { background: var(--accent-hover); border-color: var(--accent-hover); transform: translateY(-1px); }
+
+    .btn-ghost {
+      border-color: var(--border-light);
+      color: var(--text-2);
+    }
+    .btn-ghost:hover { border-color: var(--text-2); color: var(--text); }
+
+    .btn-icon {
+      padding: 0.45rem 0.55rem;
+      border-color: var(--border);
+      color: var(--text-3);
+    }
+    .btn-icon:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* ─── STATS BAR ───────────────────────────────────── */
+    .stats-bar {
+      padding: 0.5rem 2rem;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+      font-size: 0.68rem;
+      color: var(--text-3);
+      letter-spacing: 0.06em;
+      background: rgba(17,17,17,0.6);
+      flex-wrap: wrap;
+    }
+
+    .stat { display: flex; align-items: center; gap: 0.35rem; }
+    .stat-val { color: var(--accent); }
+
+    /* ─── MAIN ────────────────────────────────────────── */
+    main { max-width: 1440px; margin: 0 auto; padding: 1.75rem 2rem; }
+
+    /* ─── TOOLBAR ─────────────────────────────────────── */
+    .toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+      flex-wrap: wrap;
+    }
+
+    .tabs-wrap {
+      display: flex;
+      gap: 0.4rem;
+      overflow-x: auto;
+      scrollbar-width: none;
+      flex: 1;
+      min-width: 0;
+      padding-bottom: 2px;
+    }
+    .tabs-wrap::-webkit-scrollbar { display: none; }
+
+    .tab {
+      padding: 0.35rem 0.8rem;
+      border: 1px solid var(--border);
+      border-radius: 2px;
+      background: none;
+      color: var(--text-2);
+      cursor: pointer;
+      font-family: 'Courier New', monospace;
+      font-size: 0.7rem;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      white-space: nowrap;
+      transition: all var(--ease);
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+    }
+    .tab:hover { border-color: var(--accent); color: var(--accent); }
+    .tab.active { background: var(--accent); border-color: var(--accent); color: #080808; font-weight: bold; }
+    .tab .badge {
+      background: rgba(0,0,0,0.2);
+      border-radius: 2px;
+      padding: 0 0.3rem;
+      font-size: 0.6rem;
+      min-width: 1.4em;
+      text-align: center;
+    }
+    .tab.active .badge { background: rgba(0,0,0,0.25); }
+
+    /* ─── SEARCH ──────────────────────────────────────── */
+    .search-wrap { position: relative; }
+    .search-input {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      padding: 0.45rem 0.8rem 0.45rem 2rem;
+      color: var(--text);
+      font-family: 'Courier New', monospace;
+      font-size: 0.78rem;
+      width: 200px;
+      transition: all var(--ease);
+    }
+    .search-input:focus { outline: none; border-color: var(--accent); width: 240px; }
+    .search-input::placeholder { color: var(--text-3); }
+    .search-icon {
+      position: absolute;
+      left: 0.6rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-3);
+      pointer-events: none;
+      font-size: 0.75rem;
+    }
+
+    /* ─── GRID ────────────────────────────────────────── */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+      gap: 1.1rem;
+    }
+
+    /* ─── CARD ────────────────────────────────────────── */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      overflow: hidden;
+      cursor: pointer;
+      transition: border-color 0.25s, transform 0.25s, box-shadow 0.25s;
+      animation: pop-in 0.3s ease both;
+      position: relative;
+    }
+
+    @keyframes pop-in {
+      from { opacity: 0; transform: translateY(10px) scale(0.98); }
+      to   { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    .card:hover {
+      border-color: var(--accent);
+      transform: translateY(-3px);
+      box-shadow: 0 16px 40px rgba(0,0,0,0.5);
+    }
+
+    .card-thumb {
+      position: relative;
+      aspect-ratio: 16/9;
+      background: #1a1a1a;
+      overflow: hidden;
+    }
+
+    .card-thumb img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.4s ease;
+      display: block;
+    }
+    .card:hover .card-thumb img { transform: scale(1.05); }
+
+    .thumb-placeholder {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-3);
+      font-size: 2rem;
+      background: #161616;
+    }
+
+    .play-overlay {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(0,0,0,0);
+      transition: background 0.2s;
+    }
+    .card:hover .play-overlay { background: rgba(0,0,0,0.45); }
+
+    .play-btn {
+      width: 46px;
+      height: 46px;
+      background: var(--accent);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transform: scale(0.6);
+      transition: opacity 0.2s, transform 0.2s;
+    }
+    .card:hover .play-btn { opacity: 1; transform: scale(1); }
+
+    .card-body { padding: 0.85rem; }
+
+    .card-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 0.5rem;
+      margin-bottom: 0.3rem;
+    }
+
+    .card-cat {
+      font-size: 0.62rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--accent);
+    }
+
+    .card-views {
+      font-size: 0.62rem;
+      color: var(--text-3);
+      letter-spacing: 0.04em;
+      white-space: nowrap;
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+    }
+    .card-views.loaded { color: var(--text-2); }
+
+    .card-name-row {
+      display: flex;
+      align-items: baseline;
+      gap: 0.5rem;
+      margin-bottom: 0.75rem;
+      flex-wrap: wrap;
+    }
+
+    .card-name {
+      font-family: Georgia, 'Times New Roman', serif;
+      font-size: 0.95rem;
+      line-height: 1.4;
+      color: var(--text);
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .card-color-tag {
+      font-size: 0.68rem;
+      letter-spacing: 0.04em;
+      color: var(--text);
+      background: var(--surface-2);
+      border: 1px solid var(--border-light);
+      border-radius: 2px;
+      padding: 0.15rem 0.5rem;
+      white-space: nowrap;
+      flex-shrink: 0;
+      font-family: 'Courier New', monospace;
+    }
+
+    .card-actions {
+      display: flex;
+      gap: 0.35rem;
+      opacity: 0;
+      transform: translateY(3px);
+      transition: opacity 0.15s, transform 0.15s;
+    }
+    .card:hover .card-actions { opacity: 1; transform: translateY(0); }
+
+    .card-btn {
+      padding: 0.28rem 0.6rem;
+      border: 1px solid var(--border-light);
+      border-radius: 2px;
+      background: none;
+      color: var(--text-3);
+      cursor: pointer;
+      font-family: 'Courier New', monospace;
+      font-size: 0.62rem;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      transition: all var(--ease);
+    }
+    .card-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .card-btn.del:hover { border-color: var(--danger); color: var(--danger); background: var(--danger-dim); }
+
+    /* ─── EMPTY ───────────────────────────────────────── */
+    .empty {
+      grid-column: 1/-1;
+      text-align: center;
+      padding: 5rem 2rem;
+      color: var(--text-3);
+    }
+    .empty-icon { font-size: 2.5rem; margin-bottom: 1rem; display: block; opacity: 0.4; }
+    .empty-title { font-family: Georgia, serif; font-size: 1.1rem; color: var(--text-2); margin-bottom: 0.4rem; }
+    .empty-sub { font-size: 0.78rem; line-height: 1.7; }
+
+    /* ─── MODAL ───────────────────────────────────────── */
+    .overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.82);
+      backdrop-filter: blur(6px);
+      z-index: 200;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s;
+    }
+    .overlay.open { opacity: 1; pointer-events: all; }
+
+    .modal {
+      background: var(--surface);
+      border: 1px solid var(--border-light);
+      border-radius: var(--r);
+      width: 100%;
+      max-width: 500px;
+      max-height: 90vh;
+      overflow-y: auto;
+      transform: translateY(14px) scale(0.985);
+      transition: transform 0.22s ease;
+    }
+    .overlay.open .modal { transform: translateY(0) scale(1); }
+
+    .modal-head {
+      padding: 1.1rem 1.4rem;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .modal-title { font-family: Georgia, serif; font-size: 1rem; }
+    .modal-x {
+      background: none;
+      border: none;
+      color: var(--text-3);
+      cursor: pointer;
+      font-size: 1rem;
+      transition: color var(--ease);
+      padding: 0.1rem 0.3rem;
+    }
+    .modal-x:hover { color: var(--text); }
+
+    .modal-body { padding: 1.25rem 1.4rem; display: flex; flex-direction: column; gap: 1.1rem; }
+
+    .fgroup { display: flex; flex-direction: column; gap: 0.4rem; }
+
+    .flabel {
+      font-size: 0.67rem;
+      letter-spacing: 0.09em;
+      text-transform: uppercase;
+      color: var(--text-2);
+    }
+
+    .finput, .fselect {
+      background: var(--bg);
+      border: 1px solid var(--border-light);
+      border-radius: var(--r);
+      padding: 0.6rem 0.85rem;
+      color: var(--text);
+      font-family: 'Courier New', monospace;
+      font-size: 0.85rem;
+      width: 100%;
+      transition: border-color var(--ease);
+    }
+    .finput:focus, .fselect:focus { outline: none; border-color: var(--accent); }
+    .finput::placeholder { color: var(--text-3); }
+    .finput.err { border-color: var(--danger) !important; }
+
+    .cat-chips { display: flex; flex-wrap: wrap; gap: 0.3rem; margin-top: 0.3rem; }
+    .cat-chip {
+      padding: 0.22rem 0.5rem;
+      border: 1px solid var(--border);
+      border-radius: 2px;
+      background: none;
+      color: var(--text-3);
+      cursor: pointer;
+      font-family: 'Courier New', monospace;
+      font-size: 0.62rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      transition: all var(--ease);
+    }
+    .cat-chip:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* ─── CARD COLOR STRIP ────────────────────────────── */
+    .card-strip {
+      height: 3px;
+      width: 100%;
+      background: transparent;
+    }
+
+    .thumb-prev {
+      aspect-ratio: 16/9;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-3);
+      font-size: 0.75rem;
+    }
+    .thumb-prev img { width: 100%; height: 100%; object-fit: cover; }
+
+    .modal-foot {
+      padding: 0.9rem 1.4rem;
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.5rem;
+    }
+
+    /* ─── PLAYER MODAL ───────────────────────────────── */
+    .player-modal {
+      background: #000;
+      border: 1px solid var(--border-light);
+      border-radius: var(--r);
+      width: 100%;
+      max-width: 900px;
+      transform: translateY(14px) scale(0.985);
+      transition: transform 0.22s ease;
+      overflow: hidden;
+    }
+    .overlay.open .player-modal { transform: translateY(0) scale(1); }
+    .player-head {
+      padding: 0.75rem 1rem;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.5rem;
+    }
+    .player-title {
+      font-family: Georgia, serif;
+      font-size: 0.9rem;
+      color: var(--text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .player-wrap {
+      position: relative;
+      aspect-ratio: 16/9;
+      background: #000;
+    }
+    .player-wrap iframe {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+
+    /* ─── SETTINGS MODAL ──────────────────────────────── */
+    .settings-modal {
+      background: var(--surface);
+      border: 1px solid var(--border-light);
+      border-radius: var(--r);
+      width: 100%;
+      max-width: 440px;
+      transform: translateY(14px) scale(0.985);
+      transition: transform 0.22s ease;
+    }
+    .overlay.open .settings-modal { transform: translateY(0) scale(1); }
+
+    .api-info {
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      padding: 0.75rem 0.9rem;
+      font-size: 0.72rem;
+      color: var(--text-2);
+      line-height: 1.6;
+    }
+    .api-info a { color: var(--accent); text-decoration: none; }
+    .api-info a:hover { text-decoration: underline; }
+
+    .api-status {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.7rem;
+      padding: 0.5rem 0.7rem;
+      border-radius: var(--r);
+      margin-top: 0.5rem;
+    }
+    .api-status.ok { background: var(--green-dim); color: var(--green); }
+    .api-status.missing { background: var(--accent-dim); color: var(--accent); }
+    .dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; flex-shrink: 0; }
+
+    /* ─── TOAST ───────────────────────────────────────── */
+    .toast-wrap {
+      position: fixed;
+      bottom: 1.5rem;
+      right: 1.5rem;
+      z-index: 999;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      pointer-events: none;
+    }
+    .toast {
+      background: var(--surface-2);
+      border: 1px solid var(--border-light);
+      border-radius: var(--r);
+      padding: 0.65rem 1rem;
+      font-size: 0.75rem;
+      color: var(--text);
+      animation: toast-in 0.25s ease;
+      pointer-events: all;
+    }
+    .toast.ok { border-left: 3px solid var(--green); }
+    .toast.err { border-left: 3px solid var(--danger); }
+    @keyframes toast-in {
+      from { opacity: 0; transform: translateX(12px); }
+      to   { opacity: 1; transform: translateX(0); }
+    }
+
+    /* ─── RESPONSIVE ──────────────────────────────────── */
+    @media (max-width: 768px) {
+      header { padding: 0 1.25rem; }
+
+      main { padding: 1.25rem; }
+
+      .toolbar {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .search-wrap { display: none; }
+      .header-label { display: none; }
+
+      .grid {
+        grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+        gap: 0.9rem;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .grid { grid-template-columns: 1fr; }
+      .stats-bar { gap: 1rem; }
+    }
+
+    /* ─── SPINNER ─────────────────────────────────────── */
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .spin { animation: spin 0.8s linear infinite; display: inline-block; }
+  </style>
+</head>
+<body>
+
+<!-- ── HEADER ─────────────────────────────────────────── -->
+<header>
+  <div class="logo"><img src="logo (2).png" alt="Móveis Sul"></div>
+  <div class="header-right">
+    <div class="search-wrap">
+      <span class="search-icon">⌕</span>
+      <input class="search-input" type="search" id="searchInput" placeholder="Buscar vídeos..." oninput="render()">
+    </div>
+    <button class="btn btn-icon" title="Configurações / API Key" onclick="openSettings()">⚙</button>
+    <button class="btn btn-primary" onclick="openAdd()">
+      <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+        <line x1="5" y1="1" x2="5" y2="9"/><line x1="1" y1="5" x2="9" y2="5"/>
+      </svg>
+      Novo vídeo
+    </button>
+  </div>
+</header>
+
+<!-- ── STATS BAR ──────────────────────────────────────── -->
+<div class="stats-bar" id="statsBar">
+  <div class="stat">TOTAL <span class="stat-val" id="sTotal">0</span></div>
+  <div class="stat">CATEGORIAS <span class="stat-val" id="sCats">0</span></div>
+  <div class="stat" id="sFilteredWrap" style="display:none">FILTRADOS <span class="stat-val" id="sFiltered">0</span></div>
+  <div class="stat" id="sApiWrap" style="display:none">
+    <span class="spin">◌</span>&nbsp;BUSCANDO VIEWS...
+  </div>
+</div>
+
+<!-- ── MAIN ───────────────────────────────────────────── -->
+<main>
+  <div class="toolbar">
+    <div class="tabs-wrap" id="tabsWrap"></div>
+    <div style="display:flex;gap:0.4rem;align-items:center">
+      <!-- mobile search -->
+      <div class="search-wrap" style="display:none" id="mobileSearch">
+        <span class="search-icon">⌕</span>
+        <input class="search-input" type="search" style="width:100%" id="searchInputMobile" placeholder="Buscar..." oninput="render()">
+      </div>
+    </div>
+  </div>
+  <div class="grid" id="grid"></div>
+</main>
+
+<!-- ── ADD/EDIT MODAL ─────────────────────────────────── -->
+<div class="overlay" id="videoOverlay" onclick="handleOverlay(event,'videoOverlay')">
+  <div class="modal">
+    <div class="modal-head">
+      <span class="modal-title" id="modalTitle">Adicionar vídeo</span>
+      <button class="modal-x" onclick="closeOverlay('videoOverlay')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="fgroup">
+        <label class="flabel" for="fCat">Categoria</label>
+        <input class="finput" id="fCat" type="text" placeholder="ex: Tutoriais, Música, Dev..." autocomplete="off" oninput="renderCatChips()">
+        <div class="cat-chips" id="catChips"></div>
+      </div>
+      <div class="fgroup">
+        <label class="flabel" for="fName">Nome</label>
+        <input class="finput" id="fName" type="text" placeholder="Nome do vídeo">
+      </div>
+      <div class="fgroup">
+        <label class="flabel" for="fColor">Cor</label>
+        <input class="finput" id="fColor" type="text" placeholder="ex: Vermelho, Azul, #FF0000...">
+      </div>
+      <div class="fgroup">
+        <label class="flabel" for="fUrl">Link do YouTube</label>
+        <input class="finput" id="fUrl" type="url" placeholder="https://www.youtube.com/watch?v=..." oninput="onUrlInput()">
+      </div>
+      <div class="fgroup">
+        <label class="flabel">Prévia da miniatura</label>
+        <div class="thumb-prev" id="thumbPrev"><span>Cole o link para ver a miniatura</span></div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" onclick="closeOverlay('videoOverlay')">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveVideo()" id="saveBtn">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── PLAYER MODAL ────────────────────────────────────── -->
+<div class="overlay" id="playerOverlay" onclick="handleOverlay(event,'playerOverlay')">
+  <div class="player-modal">
+    <div class="player-head">
+      <span class="player-title" id="playerTitle"></span>
+      <button class="modal-x" onclick="closePlayer()">✕</button>
+    </div>
+    <div class="player-wrap">
+      <iframe id="playerFrame" allowfullscreen allow="autoplay; encrypted-media"></iframe>
+    </div>
+  </div>
+</div>
+
+<!-- ── SETTINGS MODAL ─────────────────────────────────── -->
+<div class="overlay" id="settingsOverlay" onclick="handleOverlay(event,'settingsOverlay')">
+  <div class="settings-modal">
+    <div class="modal-head">
+      <span class="modal-title">Configurações</span>
+      <button class="modal-x" onclick="closeOverlay('settingsOverlay')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="fgroup">
+        <label class="flabel" for="fApiKey">YouTube Data API Key</label>
+        <input class="finput" id="fApiKey" type="password" placeholder="AIza...">
+        <div class="api-info">
+          Para exibir contagem de visualizações, você precisa de uma chave gratuita da
+          <a href="https://console.cloud.google.com/" target="_blank" rel="noopener">Google Cloud Console</a>.
+          Ative a <strong>YouTube Data API v3</strong> e crie uma chave de API.
+          <div class="api-status" id="apiStatus">
+            <div class="dot"></div>
+            <span id="apiStatusText">Nenhuma chave configurada</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" onclick="closeOverlay('settingsOverlay')">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveSettings()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── TOAST CONTAINER ────────────────────────────────── -->
+<div class="toast-wrap" id="toastWrap"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>
+// ── Supabase ───────────────────────────────────────────────────
+const { createClient } = window.supabase;
+const db = createClient(
+  'https://ekkaaoceabpoezivnzwf.supabase.co',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVra2Fhb2NlYWJwb2V6aXZuendmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY1MzQyMDQsImV4cCI6MjA5MjExMDIwNH0.LCmRIaVyXcyaFe_BEpPhDfN7bdcpPTCYTJD5rjL8HNE'
+);
+
+// ── State ──────────────────────────────────────────────────────
+let videos    = [];
+let viewCache = JSON.parse(localStorage.getItem('vv_views') || '{}');
+let apiKey    = localStorage.getItem('vv_apikey') || 'AIzaSyC7vF5ut-8d-eV1RMAzO4BRoX4I7lQZjpw';
+let filter    = 'all';
+let editId    = null;
+
+// ── Load from Supabase ─────────────────────────────────────────
+async function loadVideos() {
+  document.getElementById('grid').innerHTML =
+    '<div class="empty"><span class="spin" style="font-size:2rem;color:var(--text-3)">◌</span></div>';
+  const { data, error } = await db.from('videos').select('*').order('created_at', { ascending: false });
+  if (error) { toast('Erro ao carregar vídeos: ' + error.message, 'err'); return; }
+  videos = data || [];
+  render();
+}
+
+// ── YouTube helpers ────────────────────────────────────────────
+function extractId(url) {
+  if (!url) return null;
+  const ps = [
+    /[?&]v=([a-zA-Z0-9_-]{11})/,
+    /youtu\.be\/([a-zA-Z0-9_-]{11})/,
+    /embed\/([a-zA-Z0-9_-]{11})/,
+    /shorts\/([a-zA-Z0-9_-]{11})/,
+    /v\/([a-zA-Z0-9_-]{11})/,
+  ];
+  for (const p of ps) { const m = url.match(p); if (m) return m[1]; }
+  return null;
+}
+
+function thumb(vid) { return `https://img.youtube.com/vi/${vid}/hqdefault.jpg`; }
+
+function fmtViews(n) {
+  n = parseInt(n, 10);
+  if (isNaN(n)) return '—';
+  if (n >= 1e9) return (n / 1e9).toFixed(1).replace('.0','') + 'B views';
+  if (n >= 1e6) return (n / 1e6).toFixed(1).replace('.0','') + 'M views';
+  if (n >= 1e3) return (n / 1e3).toFixed(1).replace('.0','') + 'K views';
+  return n + ' views';
+}
+
+// ── Fetch view counts ──────────────────────────────────────────
+async function fetchViews(videoIds) {
+  if (!apiKey || !videoIds.length) return;
+  const ids = videoIds.filter(id => !(id in viewCache));
+  if (!ids.length) return;
+
+  const batches = [];
+  for (let i = 0; i < ids.length; i += 50) batches.push(ids.slice(i, i + 50));
+
+  document.getElementById('sApiWrap').style.display = 'flex';
+  try {
+    for (const batch of batches) {
+      const url = `https://www.googleapis.com/youtube/v3/videos?id=${batch.join(',')}&key=${encodeURIComponent(apiKey)}&part=statistics`;
+      const res  = await fetch(url);
+      const data = await res.json();
+      if (data.error) { toast('Erro na API: ' + (data.error.message || 'Verifique sua chave.'), 'err'); break; }
+      (data.items || []).forEach(item => {
+        viewCache[item.id] = item.statistics?.viewCount ?? null;
+      });
+    }
+    localStorage.setItem('vv_views', JSON.stringify(viewCache));
+  } catch(e) { toast('Falha ao buscar visualizações.', 'err'); }
+  document.getElementById('sApiWrap').style.display = 'none';
+  render(false);
+}
+
+// ── Render ─────────────────────────────────────────────────────
+function render(doFetch = true) {
+  const q = (document.getElementById('searchInput')?.value || '').toLowerCase().trim();
+  let list = filter === 'all' ? [...videos] : videos.filter(v => v.category === filter);
+  if (q) list = list.filter(v => v.name.toLowerCase().includes(q) || (v.category||'').toLowerCase().includes(q));
+
+  document.getElementById('sTotal').textContent = videos.length;
+  document.getElementById('sCats').textContent  = getCategories().length;
+  if (filter !== 'all' || q) {
+    document.getElementById('sFilteredWrap').style.display = 'flex';
+    document.getElementById('sFiltered').textContent = list.length;
+  } else {
+    document.getElementById('sFilteredWrap').style.display = 'none';
+  }
+
+  renderTabs();
+
+  const grid = document.getElementById('grid');
+  if (!list.length) {
+    grid.innerHTML = `
+      <div class="empty">
+        <span class="empty-icon">▶</span>
+        <p class="empty-title">${filter==='all'&&!q ? 'Biblioteca vazia' : 'Nenhum resultado'}</p>
+        <p class="empty-sub">${filter==='all'&&!q ? 'Clique em "Novo vídeo" para começar.' : 'Tente outro filtro ou termo de busca.'}</p>
+      </div>`;
+    return;
+  }
+
+  grid.innerHTML = list.map((v, i) => {
+    const vid      = extractId(v.url);
+    const views    = vid && viewCache[vid] !== undefined ? viewCache[vid] : null;
+    const viewsHTML = views !== null
+      ? `<span class="card-views loaded">👁 ${fmtViews(views)}</span>`
+      : (apiKey ? `<span class="card-views">…</span>` : '');
+    const stripStyle = v.color ? `background:${esc(v.color)}` : '';
+
+    return `
+      <div class="card" style="animation-delay:${Math.min(i*0.04,0.3)}s" data-id="${v.id}" data-url="${esc(v.url)}" data-name="${esc(v.name)}">
+        <div class="card-strip" style="${stripStyle}"></div>
+        <div class="card-thumb">
+          ${vid ? `<img src="${thumb(vid)}" alt="${esc(v.name)}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">` : ''}
+          <div class="thumb-placeholder" ${vid ? 'style="display:none"' : ''}>▶</div>
+          <div class="play-overlay">
+            <div class="play-btn">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="#080808"><polygon points="4,2 14,8 4,14"/></svg>
+            </div>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="card-top">
+            <div class="card-cat">${esc(v.category || 'Sem categoria')}</div>
+            ${viewsHTML}
+          </div>
+          <div class="card-name-row">
+            <div class="card-name">${esc(v.name)}</div>
+            ${v.color ? `<span class="card-color-tag">${esc(v.color)}</span>` : ''}
+          </div>
+          <div class="card-actions">
+            <button class="card-btn" data-action="edit">Editar</button>
+            <button class="card-btn del" data-action="delete">Excluir</button>
+          </div>
+        </div>
+      </div>`;
+  }).join('');
+
+  if (doFetch && apiKey) {
+    const vids = list.map(v => extractId(v.url)).filter(Boolean);
+    fetchViews(vids);
+  }
+}
+
+function renderTabs() {
+  const cats = getCategories();
+  document.getElementById('tabsWrap').innerHTML = `
+    <button class="tab ${filter==='all'?'active':''}" data-cat="all">Todos <span class="badge">${videos.length}</span></button>
+    ${cats.map(c => {
+      const cnt = videos.filter(v => v.category === c).length;
+      return `<button class="tab ${filter===c?'active':''}" data-cat="${esc(c)}">${esc(c)}<span class="badge">${cnt}</span></button>`;
+    }).join('')}`;
+}
+
+// ── Event delegation ───────────────────────────────────────────
+document.getElementById('grid').addEventListener('click', e => {
+  const card = e.target.closest('.card');
+  if (!card) return;
+  const action = e.target.dataset.action;
+  if (action === 'edit')   { e.stopPropagation(); editVideo(card.dataset.id); return; }
+  if (action === 'delete') { e.stopPropagation(); deleteVideo(card.dataset.id); return; }
+  if (card.dataset.url) openPlayer(card.dataset.url, card.dataset.name);
+});
+
+document.getElementById('tabsWrap').addEventListener('click', e => {
+  const tab = e.target.closest('.tab');
+  if (!tab) return;
+  filter = tab.dataset.cat;
+  render();
+});
+
+// ── CRUD ───────────────────────────────────────────────────────
+function openAdd() {
+  editId = null;
+  document.getElementById('modalTitle').textContent = 'Adicionar vídeo';
+  document.getElementById('fCat').value   = filter !== 'all' ? filter : '';
+  document.getElementById('fName').value  = '';
+  document.getElementById('fUrl').value   = '';
+  document.getElementById('fColor').value = '';
+  document.getElementById('thumbPrev').innerHTML = '<span>Cole o link para ver a miniatura</span>';
+  renderCatChips();
+  openOverlay('videoOverlay');
+  setTimeout(() => document.getElementById('fCat').focus(), 80);
+}
+
+function editVideo(id) {
+  const v = videos.find(v => v.id === id);
+  if (!v) return;
+  editId = id;
+  document.getElementById('modalTitle').textContent = 'Editar vídeo';
+  document.getElementById('fCat').value   = v.category || '';
+  document.getElementById('fName').value  = v.name || '';
+  document.getElementById('fUrl').value   = v.url || '';
+  document.getElementById('fColor').value = v.color || '';
+  onUrlInput();
+  renderCatChips();
+  openOverlay('videoOverlay');
+}
+
+async function deleteVideo(id) {
+  if (!confirm('Excluir este vídeo?')) return;
+  const { error } = await db.from('videos').delete().eq('id', id);
+  if (error) { toast('Erro ao excluir: ' + error.message, 'err'); return; }
+  videos = videos.filter(v => v.id !== id);
+  if (filter !== 'all' && !getCategories().includes(filter)) filter = 'all';
+  render();
+  toast('Vídeo excluído.', 'ok');
+}
+
+async function saveVideo() {
+  const cat   = document.getElementById('fCat').value.trim();
+  const name  = document.getElementById('fName').value.trim();
+  const url   = document.getElementById('fUrl').value.trim();
+  const color = document.getElementById('fColor').value.trim();
+
+  const ni = document.getElementById('fName');
+  const ui = document.getElementById('fUrl');
+  ni.classList.remove('err'); ui.classList.remove('err');
+  if (!name) { ni.classList.add('err'); ni.focus(); return; }
+  if (!url)  { ui.classList.add('err'); ui.focus(); return; }
+
+  const btn = document.getElementById('saveBtn');
+  btn.disabled = true; btn.textContent = 'Salvando...';
+
+  const record = { id: editId || uid(), category: cat, name, url, color };
+  const { error } = await db.from('videos').upsert(record);
+
+  btn.disabled = false; btn.textContent = 'Salvar';
+  if (error) { toast('Erro ao salvar: ' + error.message, 'err'); return; }
+
+  if (editId) {
+    const idx = videos.findIndex(v => v.id === editId);
+    if (idx !== -1) videos[idx] = { ...videos[idx], ...record };
+  } else {
+    videos.unshift(record);
+  }
+
+  if (cat) filter = cat;
+  closeOverlay('videoOverlay');
+  render();
+  toast(editId ? 'Vídeo atualizado!' : 'Vídeo adicionado!', 'ok');
+}
+
+// ── Player ─────────────────────────────────────────────────────
+function openPlayer(url, name) {
+  const vid = extractId(url);
+  if (!vid) { window.open(url, '_blank', 'noopener'); return; }
+  document.getElementById('playerTitle').textContent = name || '';
+  document.getElementById('playerFrame').src = `https://www.youtube.com/embed/${vid}?autoplay=1`;
+  openOverlay('playerOverlay');
+}
+
+function closePlayer() {
+  document.getElementById('playerFrame').src = '';
+  closeOverlay('playerOverlay');
+}
+
+// ── Settings ───────────────────────────────────────────────────
+function openSettings() {
+  document.getElementById('fApiKey').value = apiKey;
+  updateApiStatus();
+  openOverlay('settingsOverlay');
+}
+
+function saveSettings() {
+  apiKey = document.getElementById('fApiKey').value.trim();
+  localStorage.setItem('vv_apikey', apiKey);
+  updateApiStatus();
+  closeOverlay('settingsOverlay');
+  toast(apiKey ? 'API Key salva! Buscando visualizações...' : 'API Key removida.', 'ok');
+  if (apiKey) { viewCache = {}; localStorage.setItem('vv_views', '{}'); render(); }
+}
+
+function updateApiStatus() {
+  const el  = document.getElementById('apiStatus');
+  const txt = document.getElementById('apiStatusText');
+  if (apiKey) { el.className = 'api-status ok';      txt.textContent = 'API Key configurada ✓'; }
+  else        { el.className = 'api-status missing'; txt.textContent = 'Nenhuma chave configurada'; }
+}
+
+// ── Modals ─────────────────────────────────────────────────────
+function openOverlay(id)  { document.getElementById(id).classList.add('open'); }
+function closeOverlay(id) { document.getElementById(id).classList.remove('open'); }
+function handleOverlay(e, id) { if (e.target === document.getElementById(id)) closeOverlay(id); }
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') { closeOverlay('videoOverlay'); closeOverlay('settingsOverlay'); closePlayer(); }
+});
+
+// ── Form helpers ───────────────────────────────────────────────
+function onUrlInput() {
+  const vid = extractId(document.getElementById('fUrl').value);
+  document.getElementById('thumbPrev').innerHTML = vid
+    ? `<img src="${thumb(vid)}" alt="Miniatura">`
+    : '<span>Cole o link para ver a miniatura</span>';
+}
+
+function renderCatChips() {
+  const cats = getCategories();
+  const q    = document.getElementById('fCat').value.toLowerCase();
+  const list = q ? cats.filter(c => c.toLowerCase().includes(q) && c.toLowerCase() !== q) : cats;
+  document.getElementById('catChips').innerHTML = list.slice(0, 7).map(c =>
+    `<button type="button" class="cat-chip" onclick="selectCat('${esc(c)}')">${esc(c)}</button>`
+  ).join('');
+}
+
+function selectCat(c) { document.getElementById('fCat').value = c; renderCatChips(); }
+
+// ── Utils ──────────────────────────────────────────────────────
+function getCategories() { return [...new Set(videos.map(v => v.category).filter(Boolean))].sort(); }
+
+function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2); }
+
+function esc(s) {
+  return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+
+function toast(msg, type = 'ok') {
+  const t = document.createElement('div');
+  t.className = `toast ${type}`;
+  t.textContent = msg;
+  document.getElementById('toastWrap').appendChild(t);
+  setTimeout(() => t.remove(), 3500);
+}
+
+// ── Init ───────────────────────────────────────────────────────
+loadVideos();
+</script>
+</body>
+</html>
