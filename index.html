@@ -765,7 +765,7 @@
       <button class="modal-x" onclick="closePlayer()">✕</button>
     </div>
     <div class="player-wrap">
-      <iframe id="playerFrame" allowfullscreen webkitallowfullscreen mozallowfullscreen allow="autoplay; encrypted-media; fullscreen; picture-in-picture" playsinline></iframe>
+      <iframe id="playerFrame" allowfullscreen allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin"></iframe>
     </div>
   </div>
 </div>
@@ -1054,7 +1054,7 @@ function openPlayer(url, name) {
   const vid = extractId(url);
   if (!vid) { window.open(url, '_blank', 'noopener'); return; }
   document.getElementById('playerTitle').textContent = name || '';
-  document.getElementById('playerFrame').src = `https://www.youtube.com/embed/${vid}?autoplay=1`;
+  document.getElementById('playerFrame').src = `https://www.youtube.com/embed/${vid}?autoplay=1&origin=${encodeURIComponent(window.location.origin)}`;
   openOverlay('playerOverlay');
 }
 
