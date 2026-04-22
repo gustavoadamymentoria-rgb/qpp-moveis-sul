@@ -529,12 +529,29 @@
       aspect-ratio: 16/9;
       background: #000;
     }
-    .player-wrap iframe {
+    .player-wrap iframe, .player-wrap > div {
       position: absolute;
       inset: 0;
       width: 100%;
       height: 100%;
       border: none;
+    }
+    .player-fallback {
+      position: absolute;
+      inset: 0;
+      background: #000;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 1.2rem;
+      padding: 1.5rem;
+    }
+    .player-fallback p {
+      color: var(--text-2);
+      font-size: 0.82rem;
+      text-align: center;
+      line-height: 1.6;
     }
 
     /* landscape mobile: ocupa tela toda */
@@ -577,6 +594,7 @@
       .player-wrap {
         flex: 1;
         aspect-ratio: unset;
+        position: relative;
       }
     }
 
@@ -765,7 +783,11 @@
       <button class="modal-x" onclick="closePlayer()">✕</button>
     </div>
     <div class="player-wrap">
-      <iframe id="playerFrame" allowfullscreen allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin"></iframe>
+      <div id="playerFrame"></div>
+      <div class="player-fallback" id="playerFallback">
+        <p>Este vídeo não pode ser incorporado.<br>Clique para assistir diretamente no YouTube.</p>
+        <a id="playerFallbackUrl" href="#" target="_blank" rel="noopener" class="btn btn-primary">▶ Abrir no YouTube</a>
+      </div>
     </div>
   </div>
 </div>
@@ -1049,17 +1071,61 @@ async function saveVideo() {
   toast(editId ? 'Vídeo atualizado!' : 'Vídeo adicionado!', 'ok');
 }
 
+// ── YouTube IFrame API ─────────────────────────────────────────
+let ytPlayer = null;
+let ytAPIReady = false;
+const ytCallbacks = [];
+
+window.onYouTubeIframeAPIReady = function() {
+  ytAPIReady = true;
+  ytCallbacks.forEach(cb => cb());
+  ytCallbacks.length = 0;
+};
+
+function loadYTAPI(cb) {
+  if (ytAPIReady) { cb(); return; }
+  ytCallbacks.push(cb);
+  if (!document.getElementById('yt-api-script')) {
+    const s = document.createElement('script');
+    s.id = 'yt-api-script';
+    s.src = 'https://www.youtube.com/iframe_api';
+    document.head.appendChild(s);
+  }
+}
+
 // ── Player ─────────────────────────────────────────────────────
+let currentPlayerUrl = '';
+
 function openPlayer(url, name) {
   const vid = extractId(url);
   if (!vid) { window.open(url, '_blank', 'noopener'); return; }
+  currentPlayerUrl = url;
   document.getElementById('playerTitle').textContent = name || '';
-  document.getElementById('playerFrame').src = `https://www.youtube.com/embed/${vid}?autoplay=1&origin=${encodeURIComponent(window.location.origin)}`;
+  document.getElementById('playerFallback').style.display = 'none';
+  document.getElementById('playerFallbackUrl').href = url;
+  document.getElementById('playerFrame').innerHTML = '';
   openOverlay('playerOverlay');
+
+  loadYTAPI(() => {
+    if (ytPlayer) { try { ytPlayer.destroy(); } catch(e) {} ytPlayer = null; }
+    ytPlayer = new YT.Player('playerFrame', {
+      videoId: vid,
+      width: '100%',
+      height: '100%',
+      playerVars: { autoplay: 1, rel: 0, playsinline: 1 },
+      events: {
+        onError: function(e) {
+          document.getElementById('playerFallback').style.display = 'flex';
+        }
+      }
+    });
+  });
 }
 
 function closePlayer() {
-  document.getElementById('playerFrame').src = '';
+  if (ytPlayer) { try { ytPlayer.stopVideo(); } catch(e) {} }
+  document.getElementById('playerFrame').innerHTML = '';
+  ytPlayer = null;
   closeOverlay('playerOverlay');
 }
 
