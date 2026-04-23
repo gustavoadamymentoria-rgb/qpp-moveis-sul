@@ -536,23 +536,6 @@
       height: 100%;
       border: none;
     }
-    .player-fallback {
-      position: absolute;
-      inset: 0;
-      background: #000;
-      display: none;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 1.2rem;
-      padding: 1.5rem;
-    }
-    .player-fallback p {
-      color: var(--text-2);
-      font-size: 0.82rem;
-      text-align: center;
-      line-height: 1.6;
-    }
 
     /* landscape mobile: ocupa tela toda */
     @media (max-width: 768px) {
@@ -691,6 +674,121 @@
     /* ─── SPINNER ─────────────────────────────────────── */
     @keyframes spin { to { transform: rotate(360deg); } }
     .spin { animation: spin 0.8s linear infinite; display: inline-block; }
+
+    /* ─── EXPORT/SHARE MODAL ─────────────────────────── */
+    .export-modal {
+      background: var(--surface);
+      border: 1px solid var(--border-light);
+      border-radius: var(--r);
+      width: 100%;
+      max-width: 420px;
+      transform: translateY(14px) scale(0.985);
+      transition: transform 0.22s ease;
+    }
+    .overlay.open .export-modal { transform: translateY(0) scale(1); }
+
+    .export-section { display: flex; flex-direction: column; gap: 0.5rem; }
+    .export-section-label {
+      font-size: 0.65rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-3);
+      margin-bottom: 0.1rem;
+    }
+    .export-btns { display: flex; gap: 0.4rem; flex-wrap: wrap; }
+    .export-btn {
+      flex: 1;
+      min-width: 120px;
+      padding: 0.7rem 0.8rem;
+      border: 1px solid var(--border-light);
+      border-radius: var(--r);
+      background: var(--surface-2);
+      color: var(--text);
+      cursor: pointer;
+      font-family: 'Courier New', monospace;
+      font-size: 0.72rem;
+      letter-spacing: 0.04em;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: all var(--ease);
+      text-align: left;
+    }
+    .export-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-dim); }
+    .export-btn .ebtn-icon { font-size: 1rem; }
+
+    /* ─── PRINT ───────────────────────────────────────── */
+    #printContainer { display: none; }
+
+    @media print {
+      body > *:not(#printContainer) { display: none !important; }
+      #printContainer {
+        display: block !important;
+        position: fixed;
+        inset: 0;
+        background: #fff;
+        color: #111;
+        padding: 2rem 2.5rem;
+        font-family: Georgia, serif;
+      }
+      .print-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        border-bottom: 2px solid #111;
+        padding-bottom: 0.75rem;
+        margin-bottom: 1.5rem;
+      }
+      .print-header h1 { font-size: 1.3rem; margin: 0; }
+      .print-header small { font-size: 0.75rem; color: #666; font-family: monospace; }
+
+      /* ── list mode ── */
+      .print-table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+      .print-table th {
+        background: #111; color: #fff;
+        padding: 0.4rem 0.6rem;
+        text-align: left;
+        font-family: monospace;
+        font-size: 0.7rem;
+        letter-spacing: 0.07em;
+        text-transform: uppercase;
+      }
+      .print-table td { padding: 0.4rem 0.6rem; border-bottom: 1px solid #ddd; vertical-align: top; }
+      .print-table tr:nth-child(even) td { background: #f7f7f7; }
+      .print-table .td-url { font-family: monospace; font-size: 0.68rem; color: #555; word-break: break-all; }
+      .print-table .td-color {
+        font-family: monospace;
+        font-size: 0.72rem;
+      }
+
+      /* ── cards mode ── */
+      .print-cards-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 0.9rem;
+      }
+      .print-card {
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        overflow: hidden;
+        break-inside: avoid;
+      }
+      .print-card-thumb { width: 100%; aspect-ratio: 16/9; object-fit: cover; display: block; }
+      .print-card-thumb-empty {
+        width: 100%; aspect-ratio: 16/9;
+        background: #eee;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #aaa;
+        font-size: 1.5rem;
+      }
+      .print-card-body { padding: 0.5rem 0.6rem; }
+      .print-card-cat { font-family: monospace; font-size: 0.6rem; color: #c77b00; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.2rem; }
+      .print-card-name { font-size: 0.82rem; font-weight: bold; margin-bottom: 0.25rem; line-height: 1.3; }
+      .print-card-color { font-family: monospace; font-size: 0.65rem; color: #555; margin-bottom: 0.2rem; }
+      .print-card-url { font-family: monospace; font-size: 0.58rem; color: #888; word-break: break-all; }
+    }
   </style>
 </head>
 <body>
@@ -703,6 +801,12 @@
       <span class="search-icon">⌕</span>
       <input class="search-input" type="search" id="searchInput" placeholder="Buscar vídeos..." oninput="render()">
     </div>
+    <button class="btn btn-ghost" onclick="openExport()" title="Exportar / Compartilhar">
+      <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M6 1v7M3 5l3-4 3 4M1 10h10"/>
+      </svg>
+      Exportar
+    </button>
     <button class="btn btn-icon" title="Configurações / API Key" onclick="openSettings()">⚙</button>
     <button class="btn btn-primary" onclick="openAdd()">
       <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
@@ -783,11 +887,7 @@
       <button class="modal-x" onclick="closePlayer()">✕</button>
     </div>
     <div class="player-wrap">
-      <div id="playerFrame"></div>
-      <div class="player-fallback" id="playerFallback">
-        <p>Este vídeo não pode ser incorporado.<br>Clique para assistir diretamente no YouTube.</p>
-        <a id="playerFallbackUrl" href="#" target="_blank" rel="noopener" class="btn btn-primary">▶ Abrir no YouTube</a>
-      </div>
+      <iframe id="playerFrame" allowfullscreen allow="autoplay; encrypted-media"></iframe>
     </div>
   </div>
 </div>
@@ -819,6 +919,71 @@
       <button class="btn btn-primary" onclick="saveSettings()">Salvar</button>
     </div>
   </div>
+</div>
+
+<!-- ── EXPORT MODAL ────────────────────────────────────── -->
+<div class="overlay" id="exportOverlay" onclick="handleOverlay(event,'exportOverlay')">
+  <div class="export-modal">
+    <div class="modal-head">
+      <span class="modal-title">Exportar / Compartilhar</span>
+      <button class="modal-x" onclick="closeOverlay('exportOverlay')">✕</button>
+    </div>
+    <div class="modal-body">
+      <p style="font-size:0.72rem;color:var(--text-3);margin-top:-0.3rem" id="exportScope"></p>
+      <div class="export-section">
+        <div class="export-section-label">Exportar PDF</div>
+        <div class="export-btns">
+          <button class="export-btn" onclick="printList()">
+            <span class="ebtn-icon">📄</span><span>Lista</span>
+          </button>
+          <button class="export-btn" onclick="printCards()">
+            <span class="ebtn-icon">🗂</span><span>Cards</span>
+          </button>
+        </div>
+      </div>
+      <div class="export-section">
+        <div class="export-section-label">Compartilhar todos</div>
+        <div class="export-btns">
+          <button class="export-btn" onclick="shareAllWhatsApp()">
+            <span class="ebtn-icon">📱</span><span>WhatsApp</span>
+          </button>
+          <button class="export-btn" onclick="shareAllEmail()">
+            <span class="ebtn-icon">✉️</span><span>Email</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── SHARE MODAL (individual) ────────────────────────── -->
+<div class="overlay" id="shareOverlay" onclick="handleOverlay(event,'shareOverlay')">
+  <div class="export-modal" style="max-width:340px">
+    <div class="modal-head">
+      <span class="modal-title">Compartilhar vídeo</span>
+      <button class="modal-x" onclick="closeOverlay('shareOverlay')">✕</button>
+    </div>
+    <div class="modal-body">
+      <p id="shareVideoName" style="font-family:Georgia,serif;color:var(--text);font-size:0.9rem;line-height:1.4;margin-top:-0.3rem"></p>
+      <div class="export-btns" style="flex-direction:column">
+        <button class="export-btn" onclick="shareOneWhatsApp()">
+          <span class="ebtn-icon">📱</span><span>Compartilhar no WhatsApp</span>
+        </button>
+        <button class="export-btn" onclick="shareOneEmail()">
+          <span class="ebtn-icon">✉️</span><span>Compartilhar por Email</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── PRINT CONTAINER ─────────────────────────────────── -->
+<div id="printContainer">
+  <div class="print-header">
+    <h1>Móveis Sul — Biblioteca de Vídeos</h1>
+    <small id="printMeta"></small>
+  </div>
+  <div id="printContent"></div>
 </div>
 
 <!-- ── TOAST CONTAINER ────────────────────────────────── -->
@@ -960,6 +1125,7 @@ function render(doFetch = true) {
           </div>
           <div class="card-actions">
             <button class="card-btn" data-action="edit">Editar</button>
+            <button class="card-btn" data-action="share">Compartilhar</button>
             <button class="card-btn del" data-action="delete">Excluir</button>
           </div>
         </div>
@@ -988,6 +1154,7 @@ document.getElementById('grid').addEventListener('click', e => {
   if (!card) return;
   const action = e.target.dataset.action;
   if (action === 'edit')   { e.stopPropagation(); editVideo(card.dataset.id); return; }
+  if (action === 'share')  { e.stopPropagation(); openShare(card.dataset.id); return; }
   if (action === 'delete') { e.stopPropagation(); deleteVideo(card.dataset.id); return; }
   if (card.dataset.url) openPlayer(card.dataset.url, card.dataset.name);
 });
@@ -1071,61 +1238,17 @@ async function saveVideo() {
   toast(editId ? 'Vídeo atualizado!' : 'Vídeo adicionado!', 'ok');
 }
 
-// ── YouTube IFrame API ─────────────────────────────────────────
-let ytPlayer = null;
-let ytAPIReady = false;
-const ytCallbacks = [];
-
-window.onYouTubeIframeAPIReady = function() {
-  ytAPIReady = true;
-  ytCallbacks.forEach(cb => cb());
-  ytCallbacks.length = 0;
-};
-
-function loadYTAPI(cb) {
-  if (ytAPIReady) { cb(); return; }
-  ytCallbacks.push(cb);
-  if (!document.getElementById('yt-api-script')) {
-    const s = document.createElement('script');
-    s.id = 'yt-api-script';
-    s.src = 'https://www.youtube.com/iframe_api';
-    document.head.appendChild(s);
-  }
-}
-
 // ── Player ─────────────────────────────────────────────────────
-let currentPlayerUrl = '';
-
 function openPlayer(url, name) {
   const vid = extractId(url);
   if (!vid) { window.open(url, '_blank', 'noopener'); return; }
-  currentPlayerUrl = url;
   document.getElementById('playerTitle').textContent = name || '';
-  document.getElementById('playerFallback').style.display = 'none';
-  document.getElementById('playerFallbackUrl').href = url;
-  document.getElementById('playerFrame').innerHTML = '';
+  document.getElementById('playerFrame').src = `https://www.youtube.com/embed/${vid}?autoplay=1`;
   openOverlay('playerOverlay');
-
-  loadYTAPI(() => {
-    if (ytPlayer) { try { ytPlayer.destroy(); } catch(e) {} ytPlayer = null; }
-    ytPlayer = new YT.Player('playerFrame', {
-      videoId: vid,
-      width: '100%',
-      height: '100%',
-      playerVars: { autoplay: 1, rel: 0, playsinline: 1 },
-      events: {
-        onError: function(e) {
-          document.getElementById('playerFallback').style.display = 'flex';
-        }
-      }
-    });
-  });
 }
 
 function closePlayer() {
-  if (ytPlayer) { try { ytPlayer.stopVideo(); } catch(e) {} }
-  document.getElementById('playerFrame').innerHTML = '';
-  ytPlayer = null;
+  document.getElementById('playerFrame').src = '';
   closeOverlay('playerOverlay');
 }
 
@@ -1196,6 +1319,141 @@ function toast(msg, type = 'ok') {
   t.textContent = msg;
   document.getElementById('toastWrap').appendChild(t);
   setTimeout(() => t.remove(), 3500);
+}
+
+// ── Export / Share ─────────────────────────────────────────────
+let shareVideoId = null;
+
+function getCurrentList() {
+  const q = (document.getElementById('searchInput')?.value || '').toLowerCase().trim();
+  let list = filter === 'all' ? [...videos] : videos.filter(v => v.category === filter);
+  if (q) list = list.filter(v => v.name.toLowerCase().includes(q) || (v.category||'').toLowerCase().includes(q));
+  return list;
+}
+
+function openExport() {
+  const list = getCurrentList();
+  const scope = filter !== 'all' ? `Categoria: ${filter} (${list.length} vídeos)` : `Todos os vídeos (${list.length})`;
+  document.getElementById('exportScope').textContent = scope;
+  openOverlay('exportOverlay');
+}
+
+function openShare(id) {
+  const v = videos.find(v => v.id === id);
+  if (!v) return;
+  shareVideoId = id;
+  document.getElementById('shareVideoName').textContent = v.name;
+  openOverlay('shareOverlay');
+}
+
+function buildAllText(list) {
+  const byCat = {};
+  list.forEach(v => {
+    const cat = v.category || 'Sem categoria';
+    if (!byCat[cat]) byCat[cat] = [];
+    byCat[cat].push(v);
+  });
+  let text = '🎬 *Biblioteca de Vídeos — Móveis Sul*\n\n';
+  Object.entries(byCat).forEach(([cat, vids]) => {
+    text += `*${cat}*\n`;
+    vids.forEach(v => {
+      text += `• ${v.name}${v.color ? ' [' + v.color + ']' : ''}\n  ${v.url}\n`;
+    });
+    text += '\n';
+  });
+  return text;
+}
+
+function shareAllWhatsApp() {
+  const text = buildAllText(getCurrentList());
+  window.open('https://wa.me/?text=' + encodeURIComponent(text), '_blank', 'noopener');
+}
+
+function shareAllEmail() {
+  const list = getCurrentList();
+  const byCat = {};
+  list.forEach(v => {
+    const cat = v.category || 'Sem categoria';
+    if (!byCat[cat]) byCat[cat] = [];
+    byCat[cat].push(v);
+  });
+  let body = 'Biblioteca de Vídeos — Móveis Sul\n\n';
+  Object.entries(byCat).forEach(([cat, vids]) => {
+    body += `== ${cat} ==\n`;
+    vids.forEach(v => {
+      body += `• ${v.name}${v.color ? ' [' + v.color + ']' : ''}\n  ${v.url}\n`;
+    });
+    body += '\n';
+  });
+  window.location.href = 'mailto:?subject=' + encodeURIComponent('Biblioteca de Vídeos — Móveis Sul') + '&body=' + encodeURIComponent(body);
+}
+
+function shareOneWhatsApp() {
+  const v = videos.find(v => v.id === shareVideoId);
+  if (!v) return;
+  let text = `🎬 *${v.name}*\n`;
+  if (v.category) text += `Categoria: ${v.category}\n`;
+  if (v.color) text += `Cor: ${v.color}\n`;
+  text += `\n${v.url}`;
+  window.open('https://wa.me/?text=' + encodeURIComponent(text), '_blank', 'noopener');
+}
+
+function shareOneEmail() {
+  const v = videos.find(v => v.id === shareVideoId);
+  if (!v) return;
+  let body = `${v.name}\n`;
+  if (v.category) body += `Categoria: ${v.category}\n`;
+  if (v.color) body += `Cor: ${v.color}\n`;
+  body += `\n${v.url}`;
+  window.location.href = 'mailto:?subject=' + encodeURIComponent('Vídeo: ' + v.name) + '&body=' + encodeURIComponent(body);
+}
+
+function printList() {
+  const list = getCurrentList();
+  document.getElementById('printMeta').textContent =
+    (filter !== 'all' ? filter + ' · ' : '') + list.length + ' vídeos · ' + new Date().toLocaleDateString('pt-BR');
+  document.getElementById('printContent').innerHTML = `
+    <table class="print-table">
+      <thead><tr><th>Categoria</th><th>Nome</th><th>Cor</th><th>Link</th></tr></thead>
+      <tbody>
+        ${list.map(v => `
+          <tr>
+            <td>${esc(v.category || '—')}</td>
+            <td>${esc(v.name)}</td>
+            <td class="td-color">${esc(v.color || '—')}</td>
+            <td class="td-url">${esc(v.url)}</td>
+          </tr>`).join('')}
+      </tbody>
+    </table>`;
+  closeOverlay('exportOverlay');
+  setTimeout(() => window.print(), 120);
+}
+
+function printCards() {
+  const list = getCurrentList();
+  document.getElementById('printMeta').textContent =
+    (filter !== 'all' ? filter + ' · ' : '') + list.length + ' vídeos · ' + new Date().toLocaleDateString('pt-BR');
+  document.getElementById('printContent').innerHTML = `
+    <div class="print-cards-grid">
+      ${list.map(v => {
+        const vid = extractId(v.url);
+        const thumbUrl = vid ? `https://img.youtube.com/vi/${vid}/hqdefault.jpg` : '';
+        return `
+          <div class="print-card">
+            ${thumbUrl
+              ? `<img class="print-card-thumb" src="${thumbUrl}" alt="${esc(v.name)}">`
+              : `<div class="print-card-thumb-empty">▶</div>`}
+            <div class="print-card-body">
+              ${v.category ? `<div class="print-card-cat">${esc(v.category)}</div>` : ''}
+              <div class="print-card-name">${esc(v.name)}</div>
+              ${v.color ? `<div class="print-card-color">${esc(v.color)}</div>` : ''}
+              <div class="print-card-url">${esc(v.url)}</div>
+            </div>
+          </div>`;
+      }).join('')}
+    </div>`;
+  closeOverlay('exportOverlay');
+  setTimeout(() => window.print(), 120);
 }
 
 // ── Init ───────────────────────────────────────────────────────
