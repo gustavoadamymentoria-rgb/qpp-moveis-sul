@@ -1196,6 +1196,7 @@ function render(doFetch = true) {
           </div>
           <div class="card-actions">
             <button class="card-btn" data-action="edit">Editar</button>
+            <button class="card-btn" data-action="export">Exportar</button>
             <button class="card-btn" data-action="share">Compartilhar</button>
             <button class="card-btn del" data-action="delete">Excluir</button>
           </div>
@@ -1225,6 +1226,7 @@ document.getElementById('grid').addEventListener('click', e => {
   if (!card) return;
   const action = e.target.dataset.action;
   if (action === 'edit')   { e.stopPropagation(); editVideo(card.dataset.id); return; }
+  if (action === 'export') { e.stopPropagation(); openCardExport(card.dataset.id); return; }
   if (action === 'share')  { e.stopPropagation(); openShare(card.dataset.id); return; }
   if (action === 'delete') { e.stopPropagation(); deleteVideo(card.dataset.id); return; }
   if (card.dataset.url) openPlayer(card.dataset.url, card.dataset.name);
@@ -1394,6 +1396,7 @@ function toast(msg, type = 'ok') {
 
 // ── Export / Share ─────────────────────────────────────────────
 let shareVideoId = null;
+let exportVideoId = null;
 
 function getCurrentList() {
   const q = (document.getElementById('searchInput')?.value || '').toLowerCase().trim();
@@ -1402,10 +1405,24 @@ function getCurrentList() {
   return list;
 }
 
+function getExportList() {
+  if (exportVideoId) return videos.filter(v => v.id === exportVideoId);
+  return getCurrentList();
+}
+
 function openExport() {
+  exportVideoId = null;
   const list = getCurrentList();
   const label = filter !== 'all' ? `📁 ${filter} · ${list.length} vídeos` : `📁 Todos · ${list.length} vídeos`;
   document.getElementById('exportScope').textContent = label;
+  openOverlay('exportOverlay');
+}
+
+function openCardExport(id) {
+  exportVideoId = id;
+  const v = videos.find(v => v.id === id);
+  if (!v) return;
+  document.getElementById('exportScope').textContent = `◻ ${v.name}`;
   openOverlay('exportOverlay');
 }
 
@@ -1480,12 +1497,13 @@ function shareOneEmail() {
 }
 
 function printMeta(list) {
+  const prefix = exportVideoId ? '' : (filter !== 'all' ? filter + ' · ' : '');
   document.getElementById('printMeta').textContent =
-    (filter !== 'all' ? filter + ' · ' : '') + list.length + ' vídeos · ' + new Date().toLocaleDateString('pt-BR');
+    prefix + list.length + (list.length === 1 ? ' vídeo' : ' vídeos') + ' · ' + new Date().toLocaleDateString('pt-BR');
 }
 
 function printList() {
-  const list = getCurrentList();
+  const list = getExportList();
   printMeta(list);
   document.getElementById('printContent').innerHTML = `
     <table class="print-table">
@@ -1505,7 +1523,7 @@ function printList() {
 }
 
 function printCards() {
-  const list = getCurrentList();
+  const list = getExportList();
   printMeta(list);
   document.getElementById('printContent').innerHTML = `
     <div class="print-cards-grid">
@@ -1532,7 +1550,7 @@ function printCards() {
 }
 
 function printCardsSeparate() {
-  const list = getCurrentList();
+  const list = getExportList();
   printMeta(list);
   document.getElementById('printContent').innerHTML = list.map(v => {
     const vid = extractId(v.url);
