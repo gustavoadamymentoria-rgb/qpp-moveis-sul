@@ -342,27 +342,29 @@
     .card-actions {
       display: flex;
       gap: 0.35rem;
-      opacity: 0;
-      transform: translateY(3px);
-      transition: opacity 0.15s, transform 0.15s;
+      flex-wrap: wrap;
     }
-    .card:hover .card-actions { opacity: 1; transform: translateY(0); }
 
     .card-btn {
-      padding: 0.28rem 0.6rem;
-      border: 1px solid var(--border-light);
+      padding: 0.3rem 0.65rem;
       border-radius: 2px;
-      background: none;
-      color: var(--text-3);
+      border: 1px solid transparent;
       cursor: pointer;
       font-family: 'Courier New', monospace;
       font-size: 0.62rem;
       letter-spacing: 0.05em;
       text-transform: uppercase;
       transition: all var(--ease);
+      font-weight: bold;
     }
-    .card-btn:hover { border-color: var(--accent); color: var(--accent); }
-    .card-btn.del:hover { border-color: var(--danger); color: var(--danger); background: var(--danger-dim); }
+    .card-btn.edit  { background: rgba(100,140,255,0.12); border-color: rgba(100,140,255,0.3); color: #7a9fff; }
+    .card-btn.edit:hover  { background: rgba(100,140,255,0.22); border-color: #7a9fff; }
+    .card-btn.exp   { background: var(--accent-dim); border-color: rgba(245,166,35,0.35); color: var(--accent); }
+    .card-btn.exp:hover   { background: rgba(245,166,35,0.22); border-color: var(--accent); }
+    .card-btn.shr   { background: rgba(82,194,122,0.1); border-color: rgba(82,194,122,0.3); color: var(--green); }
+    .card-btn.shr:hover   { background: rgba(82,194,122,0.2); border-color: var(--green); }
+    .card-btn.del   { background: var(--danger-dim); border-color: rgba(224,82,82,0.3); color: var(--danger); }
+    .card-btn.del:hover   { background: rgba(224,82,82,0.2); border-color: var(--danger); }
 
     /* ─── EMPTY ───────────────────────────────────────── */
     .empty {
@@ -1195,9 +1197,9 @@ function render(doFetch = true) {
             ${v.color ? `<span class="card-color-tag">${esc(v.color)}</span>` : ''}
           </div>
           <div class="card-actions">
-            <button class="card-btn" data-action="edit">Editar</button>
-            <button class="card-btn" data-action="export">Exportar</button>
-            <button class="card-btn" data-action="share">Compartilhar</button>
+            <button class="card-btn edit" data-action="edit">Editar</button>
+            <button class="card-btn exp" data-action="export">Exportar</button>
+            <button class="card-btn shr" data-action="share">Compartilhar</button>
             <button class="card-btn del" data-action="delete">Excluir</button>
           </div>
         </div>
