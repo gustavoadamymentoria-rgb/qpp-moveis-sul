@@ -1020,7 +1020,15 @@
   <div class="player-modal">
     <div class="player-head">
       <span class="player-title" id="playerTitle"></span>
-      <button class="modal-x" onclick="closePlayer()">✕</button>
+      <div style="display:flex;align-items:center;gap:0.5rem;flex-shrink:0">
+        <a id="playerYtLink" href="#" target="_blank" rel="noopener"
+           style="font-family:'Courier New',monospace;font-size:0.65rem;letter-spacing:0.05em;color:var(--text-3);text-decoration:none;text-transform:uppercase;padding:0.3rem 0.5rem;border:1px solid var(--border);border-radius:2px;transition:all 0.2s;white-space:nowrap"
+           onmouseover="this.style.color='var(--accent)';this.style.borderColor='var(--accent)'"
+           onmouseout="this.style.color='var(--text-3)';this.style.borderColor='var(--border)'">
+          ↗ YouTube
+        </a>
+        <button class="modal-x" onclick="closePlayer()">✕</button>
+      </div>
     </div>
     <div class="player-wrap">
       <iframe id="playerFrame" allowfullscreen allow="autoplay; encrypted-media"></iframe>
@@ -1341,7 +1349,7 @@ document.getElementById('grid').addEventListener('click', e => {
   if (action === 'export')  { e.stopPropagation(); openCardExport(card.dataset.id); return; }
   if (action === 'share')   { e.stopPropagation(); openShare(card.dataset.id); return; }
   if (action === 'delete')  { e.stopPropagation(); deleteVideo(card.dataset.id); return; }
-  const imgDiv = e.target.closest('[data-action="imgview"]');
+  const imgDiv = e.target.closest('.card-img');
   if (imgDiv) { e.stopPropagation(); openLightbox(imgDiv.dataset.imgurl); return; }
   if (card.dataset.url) openPlayer(card.dataset.url, card.dataset.name);
 });
@@ -1436,6 +1444,7 @@ function openPlayer(url, name) {
   if (!vid) { window.open(url, '_blank', 'noopener'); return; }
   document.getElementById('playerTitle').textContent = name || '';
   document.getElementById('playerFrame').src = `https://www.youtube.com/embed/${vid}?autoplay=1`;
+  document.getElementById('playerYtLink').href = url;
   openOverlay('playerOverlay');
 }
 
