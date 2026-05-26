@@ -309,6 +309,26 @@
     }
     .card-img-label span { color: var(--accent); font-size: 0.65rem; }
 
+    .card-img-badge {
+      position: absolute;
+      top: 0.5rem;
+      left: 0.5rem;
+      background: rgba(0,0,0,0.52);
+      backdrop-filter: blur(4px);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 3px;
+      padding: 0.2rem 0.45rem;
+      font-family: 'Courier New', monospace;
+      font-size: 0.6rem;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.65);
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+      pointer-events: none;
+    }
+
     /* ─── IMAGE LIGHTBOX ─────────────────────────────── */
     #imgLightbox {
       position: fixed; inset: 0;
@@ -1292,7 +1312,7 @@ function render(doFetch = true) {
             <button class="card-btn del" data-action="delete">Excluir</button>
           </div>
         </div>
-        ${v.image_url ? `<div class="card-img" data-action="imgview" data-imgurl="${esc(driveEmbed(v.image_url))}"><img src="${esc(driveEmbed(v.image_url))}" alt="${esc(v.name)}" loading="lazy" onerror="this.parentElement.style.display='none'"><div class="card-img-label">Imagem do produto <span>🔍 ampliar</span></div></div>` : ''}
+        ${v.image_url ? `<div class="card-img" data-action="imgview" data-imgurl="${esc(driveEmbed(v.image_url))}"><img src="${esc(driveEmbed(v.image_url))}" alt="${esc(v.name)}" loading="lazy" onerror="this.parentElement.style.display='none'"><div class="card-img-badge">📁 Folder</div><div class="card-img-label">Imagem do produto <span>🔍 ampliar</span></div></div>` : ''}
       </div>`;
   }).join('');
 
