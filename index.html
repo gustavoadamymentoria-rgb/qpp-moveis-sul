@@ -282,30 +282,59 @@
     /* ─── CARD PRODUCT IMAGE ─────────────────────────── */
     .card-img {
       border-top: 1px solid var(--border);
-      background: #111;
+      background: #0e0e0e;
       overflow: hidden;
-      aspect-ratio: 4/3;
       position: relative;
+      cursor: zoom-in;
     }
     .card-img img {
       width: 100%;
-      height: 100%;
-      object-fit: cover;
       display: block;
-      transition: transform 0.4s ease;
+      object-fit: contain;
+      max-height: 220px;
+      transition: transform 0.35s ease;
     }
-    .card:hover .card-img img { transform: scale(1.04); }
+    .card-img:hover img { transform: scale(1.03); }
     .card-img-label {
-      position: absolute;
-      bottom: 0; left: 0; right: 0;
-      padding: 0.25rem 0.5rem;
-      background: rgba(0,0,0,0.55);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.3rem 0.6rem;
+      background: rgba(0,0,0,0.5);
       font-size: 0.58rem;
       letter-spacing: 0.07em;
       text-transform: uppercase;
       color: var(--text-3);
       font-family: 'Courier New', monospace;
     }
+    .card-img-label span { color: var(--accent); font-size: 0.65rem; }
+
+    /* ─── IMAGE LIGHTBOX ─────────────────────────────── */
+    #imgLightbox {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.92);
+      z-index: 300;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+      cursor: zoom-out;
+    }
+    #imgLightbox.open { display: flex; }
+    #imgLightbox img {
+      max-width: 100%; max-height: 90vh;
+      object-fit: contain;
+      border-radius: 3px;
+      box-shadow: 0 24px 80px rgba(0,0,0,0.8);
+    }
+    #imgLightboxClose {
+      position: absolute; top: 1rem; right: 1rem;
+      background: none; border: none;
+      color: #fff; font-size: 1.5rem;
+      cursor: pointer; opacity: 0.7;
+      transition: opacity 0.15s;
+    }
+    #imgLightboxClose:hover { opacity: 1; }
 
     .card-body { padding: 0.85rem; }
 
@@ -1083,6 +1112,12 @@
   </div>
 </div>
 
+<!-- ── IMAGE LIGHTBOX ─────────────────────────────────── -->
+<div id="imgLightbox" onclick="closeLightbox()">
+  <button id="imgLightboxClose" onclick="closeLightbox()">✕</button>
+  <img id="imgLightboxImg" src="" alt="Imagem do produto">
+</div>
+
 <!-- ── PRINT CONTAINER ─────────────────────────────────── -->
 <div id="printContainer">
   <div class="print-header">
@@ -1120,6 +1155,17 @@ async function loadVideos() {
   videos = data || [];
   render();
 }
+
+// ── Image Lightbox ─────────────────────────────────────────────
+function openLightbox(url) {
+  document.getElementById('imgLightboxImg').src = url;
+  document.getElementById('imgLightbox').classList.add('open');
+}
+function closeLightbox() {
+  document.getElementById('imgLightbox').classList.remove('open');
+  document.getElementById('imgLightboxImg').src = '';
+}
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLightbox(); });
 
 // ── Google Drive helpers ───────────────────────────────────────
 function driveEmbed(url) {
@@ -1221,7 +1267,6 @@ function render(doFetch = true) {
     return `
       <div class="card" style="animation-delay:${Math.min(i*0.04,0.3)}s" data-id="${v.id}" data-url="${esc(v.url)}" data-name="${esc(v.name)}">
         <div class="card-strip" style="${stripStyle}"></div>
-        ${v.image_url ? `<div class="card-img"><img src="${esc(driveEmbed(v.image_url))}" alt="${esc(v.name)}" loading="lazy" onerror="this.parentElement.style.display='none'"><div class="card-img-label">Imagem do produto</div></div>` : ''}
         <div class="card-thumb">
           ${vid ? `<img src="${thumb(vid)}" alt="${esc(v.name)}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">` : ''}
           <div class="thumb-placeholder" ${vid ? 'style="display:none"' : ''}>▶</div>
@@ -1247,6 +1292,7 @@ function render(doFetch = true) {
             <button class="card-btn del" data-action="delete">Excluir</button>
           </div>
         </div>
+        ${v.image_url ? `<div class="card-img" data-action="imgview" data-imgurl="${esc(driveEmbed(v.image_url))}"><img src="${esc(driveEmbed(v.image_url))}" alt="${esc(v.name)}" loading="lazy" onerror="this.parentElement.style.display='none'"><div class="card-img-label">Imagem do produto <span>🔍 ampliar</span></div></div>` : ''}
       </div>`;
   }).join('');
 
@@ -1271,10 +1317,12 @@ document.getElementById('grid').addEventListener('click', e => {
   const card = e.target.closest('.card');
   if (!card) return;
   const action = e.target.dataset.action;
-  if (action === 'edit')   { e.stopPropagation(); editVideo(card.dataset.id); return; }
-  if (action === 'export') { e.stopPropagation(); openCardExport(card.dataset.id); return; }
-  if (action === 'share')  { e.stopPropagation(); openShare(card.dataset.id); return; }
-  if (action === 'delete') { e.stopPropagation(); deleteVideo(card.dataset.id); return; }
+  if (action === 'edit')    { e.stopPropagation(); editVideo(card.dataset.id); return; }
+  if (action === 'export')  { e.stopPropagation(); openCardExport(card.dataset.id); return; }
+  if (action === 'share')   { e.stopPropagation(); openShare(card.dataset.id); return; }
+  if (action === 'delete')  { e.stopPropagation(); deleteVideo(card.dataset.id); return; }
+  const imgDiv = e.target.closest('[data-action="imgview"]');
+  if (imgDiv) { e.stopPropagation(); openLightbox(imgDiv.dataset.imgurl); return; }
   if (card.dataset.url) openPlayer(card.dataset.url, card.dataset.name);
 });
 
