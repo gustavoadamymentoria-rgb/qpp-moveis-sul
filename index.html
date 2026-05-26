@@ -279,6 +279,34 @@
     }
     .card:hover .play-btn { opacity: 1; transform: scale(1); }
 
+    /* ─── CARD PRODUCT IMAGE ─────────────────────────── */
+    .card-img {
+      border-top: 1px solid var(--border);
+      background: #111;
+      overflow: hidden;
+      aspect-ratio: 4/3;
+      position: relative;
+    }
+    .card-img img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: transform 0.4s ease;
+    }
+    .card:hover .card-img img { transform: scale(1.04); }
+    .card-img-label {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      padding: 0.25rem 0.5rem;
+      background: rgba(0,0,0,0.55);
+      font-size: 0.58rem;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      color: var(--text-3);
+      font-family: 'Courier New', monospace;
+    }
+
     .card-body { padding: 0.85rem; }
 
     .card-top {
@@ -925,6 +953,11 @@
         <label class="flabel">Prévia da miniatura</label>
         <div class="thumb-prev" id="thumbPrev"><span>Cole o link para ver a miniatura</span></div>
       </div>
+      <div class="fgroup">
+        <label class="flabel" for="fImage">Imagem do produto (Google Drive)</label>
+        <input class="finput" id="fImage" type="url" placeholder="https://drive.google.com/file/d/..." oninput="onImageInput()">
+        <div class="thumb-prev" id="imagePrev" style="display:none"><span>Cole o link para ver a imagem</span></div>
+      </div>
     </div>
     <div class="modal-foot">
       <button class="btn btn-ghost" onclick="closeOverlay('videoOverlay')">Cancelar</button>
@@ -1088,6 +1121,16 @@ async function loadVideos() {
   render();
 }
 
+// ── Google Drive helpers ───────────────────────────────────────
+function driveEmbed(url) {
+  if (!url) return '';
+  const m = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
+  if (m) return `https://drive.google.com/thumbnail?id=${m[1]}&sz=w800`;
+  const m2 = url.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+  if (m2) return `https://drive.google.com/thumbnail?id=${m2[1]}&sz=w800`;
+  return url;
+}
+
 // ── YouTube helpers ────────────────────────────────────────────
 function extractId(url) {
   if (!url) return null;
@@ -1178,6 +1221,7 @@ function render(doFetch = true) {
     return `
       <div class="card" style="animation-delay:${Math.min(i*0.04,0.3)}s" data-id="${v.id}" data-url="${esc(v.url)}" data-name="${esc(v.name)}">
         <div class="card-strip" style="${stripStyle}"></div>
+        ${v.image_url ? `<div class="card-img"><img src="${esc(driveEmbed(v.image_url))}" alt="${esc(v.name)}" loading="lazy" onerror="this.parentElement.style.display='none'"><div class="card-img-label">Imagem do produto</div></div>` : ''}
         <div class="card-thumb">
           ${vid ? `<img src="${thumb(vid)}" alt="${esc(v.name)}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">` : ''}
           <div class="thumb-placeholder" ${vid ? 'style="display:none"' : ''}>▶</div>
@@ -1245,11 +1289,13 @@ document.getElementById('tabsWrap').addEventListener('click', e => {
 function openAdd() {
   editId = null;
   document.getElementById('modalTitle').textContent = 'Adicionar vídeo';
-  document.getElementById('fCat').value   = filter !== 'all' ? filter : '';
-  document.getElementById('fName').value  = '';
-  document.getElementById('fUrl').value   = '';
-  document.getElementById('fColor').value = '';
+  document.getElementById('fCat').value    = filter !== 'all' ? filter : '';
+  document.getElementById('fName').value   = '';
+  document.getElementById('fUrl').value    = '';
+  document.getElementById('fColor').value  = '';
+  document.getElementById('fImage').value  = '';
   document.getElementById('thumbPrev').innerHTML = '<span>Cole o link para ver a miniatura</span>';
+  document.getElementById('imagePrev').style.display = 'none';
   renderCatChips();
   openOverlay('videoOverlay');
   setTimeout(() => document.getElementById('fCat').focus(), 80);
@@ -1260,11 +1306,13 @@ function editVideo(id) {
   if (!v) return;
   editId = id;
   document.getElementById('modalTitle').textContent = 'Editar vídeo';
-  document.getElementById('fCat').value   = v.category || '';
-  document.getElementById('fName').value  = v.name || '';
-  document.getElementById('fUrl').value   = v.url || '';
-  document.getElementById('fColor').value = v.color || '';
+  document.getElementById('fCat').value    = v.category || '';
+  document.getElementById('fName').value   = v.name || '';
+  document.getElementById('fUrl').value    = v.url || '';
+  document.getElementById('fColor').value  = v.color || '';
+  document.getElementById('fImage').value  = v.image_url || '';
   onUrlInput();
+  onImageInput();
   renderCatChips();
   openOverlay('videoOverlay');
 }
@@ -1280,10 +1328,11 @@ async function deleteVideo(id) {
 }
 
 async function saveVideo() {
-  const cat   = document.getElementById('fCat').value.trim();
-  const name  = document.getElementById('fName').value.trim();
-  const url   = document.getElementById('fUrl').value.trim();
-  const color = document.getElementById('fColor').value.trim();
+  const cat       = document.getElementById('fCat').value.trim();
+  const name      = document.getElementById('fName').value.trim();
+  const url       = document.getElementById('fUrl').value.trim();
+  const color     = document.getElementById('fColor').value.trim();
+  const image_url = document.getElementById('fImage').value.trim();
 
   const ni = document.getElementById('fName');
   const ui = document.getElementById('fUrl');
@@ -1294,7 +1343,7 @@ async function saveVideo() {
   const btn = document.getElementById('saveBtn');
   btn.disabled = true; btn.textContent = 'Salvando...';
 
-  const record = { id: editId || uid(), category: cat, name, url, color };
+  const record = { id: editId || uid(), category: cat, name, url, color, image_url };
   const { error } = await db.from('videos').upsert(record);
 
   btn.disabled = false; btn.textContent = 'Salvar';
@@ -1365,6 +1414,17 @@ function onUrlInput() {
   document.getElementById('thumbPrev').innerHTML = vid
     ? `<img src="${thumb(vid)}" alt="Miniatura">`
     : '<span>Cole o link para ver a miniatura</span>';
+}
+
+function onImageInput() {
+  const url = document.getElementById('fImage').value.trim();
+  const prev = document.getElementById('imagePrev');
+  if (url) {
+    prev.style.display = '';
+    prev.innerHTML = `<img src="${driveEmbed(url)}" alt="Imagem do produto" onerror="this.parentElement.innerHTML='<span>Não foi possível carregar a imagem</span>'">`;
+  } else {
+    prev.style.display = 'none';
+  }
 }
 
 function renderCatChips() {
