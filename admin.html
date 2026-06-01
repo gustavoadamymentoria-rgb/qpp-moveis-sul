@@ -1014,7 +1014,7 @@
       </div>
       <div class="fgroup">
         <label class="flabel" for="fImage">Imagem do produto (Google Drive)</label>
-        <input class="finput" id="fImage" type="url" placeholder="https://drive.google.com/file/d/..." oninput="onImageInput()">
+        <input class="finput" id="fImage" type="text" placeholder="https://drive.google.com/file/d/..." oninput="onImageInput()">
         <div class="thumb-prev" id="imagePrev" style="display:none"><span>Cole o link para ver a imagem</span></div>
       </div>
     </div>
@@ -1439,7 +1439,7 @@ async function saveVideo() {
   const name      = document.getElementById('fName').value.trim();
   const url       = document.getElementById('fUrl').value.trim();
   const color     = document.getElementById('fColor').value.trim();
-  const image_url = document.getElementById('fImage').value.trim();
+  const image_url = document.getElementById('fImage').value.trim() || null;
 
   const ni = document.getElementById('fName');
   const ui = document.getElementById('fUrl');
